@@ -15,6 +15,7 @@ router.post(
     body("password","Your password must be greater than five character").isLength({ min: 5 }),
   ],
   async (req, res) => {
+    let success=false;
     //validation for icorrect credentials
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -24,7 +25,8 @@ router.post(
     //validation for dublicate entry\\
    let user= await User.findOne({email:req.body.email});
    if(user){
-    return res.status(400).json({error:"Sorry a user with this email already exists"})
+    success=false;
+    return res.status(400).json({success,error:"Sorry a user with this email already exists"})
    }
    const salt = await bcrypt.genSalt(10);
    const secPass = await bcrypt.hash(req.body.password,salt);
@@ -39,7 +41,8 @@ router.post(
         }
       }
       const authtoken= jwt.sign(data,Jwt_Secret);
-      res.json({authtoken});
+      success=true;
+      res.json({success,authtoken});
     }catch(err){
         console.log(err.message);
         res.status(500).send("Internal server error")
@@ -52,6 +55,7 @@ router.post("/login", [
     body("password","Password cannot be blank").exists(),
   ],
   async (req, res) => {
+    let success=false
     //validation for correct credentials
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -65,6 +69,7 @@ router.post("/login", [
     }
     const passwordCompare=await bcrypt.compare(password,user.password);
     if(!passwordCompare){
+      success=false
       return res.status(400).json({error:"Please login with correct crendentials"});
     }
     const data ={
@@ -73,7 +78,8 @@ router.post("/login", [
       }
     }
     const authtoken= jwt.sign(data,Jwt_Secret);
-    res.json({authtoken});
+    success=true
+    res.json({success,authtoken});
   }
     catch(err){
       console.log(err.message);

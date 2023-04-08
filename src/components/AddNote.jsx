@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import noteContext from "../context/notes/noteContext";
-const AddNote = () => {
+const AddNote = (props) => {
   const context = useContext(noteContext);
   const { addNote,getnotes } = context;
   const [note, setNote] = useState({
@@ -10,8 +10,9 @@ const AddNote = () => {
   });
   const handleClick = async(e) => {
     await addNote(note.title, note.description, note.tag);
-    getnotes()
     e.preventDefault();
+    getnotes()
+    props.showAlert("Note Added Successfully","success")
   };
   const onChange = (e) => {
     setNote({ ...note, [e.target.name]: e.target.value });
@@ -62,6 +63,7 @@ const AddNote = () => {
             type="submit"
             className="btn btn-primary"
             onClick={handleClick}
+            disabled={note.title<3 || note.description<5}
           >
             Submit
           </button>
